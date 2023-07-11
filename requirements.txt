@@ -1,5 +1,6 @@
 streamlit==1.24.1
 SpeechRecognition==3.10.0
+audioio==0.9.2
 PyAudio==0.2.13
 pyttsx3==2.90
 requests==2.31.0
