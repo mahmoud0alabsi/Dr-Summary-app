@@ -1,0 +1,7 @@
+streamlit
+time
+speech_recognition
+pyttsx3
+requests
+json
+pyaudio
