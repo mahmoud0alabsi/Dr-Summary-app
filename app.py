@@ -4,15 +4,15 @@ import speech_recognition as sr
 import pyttsx3
 import requests
 import json
-from streamlit_webrtc import WebRtcMode, webrtc_streamer
+# from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
-webrtc_ctx = webrtc_streamer(
-        key="speech-to-text",
-        mode=WebRtcMode.SENDONLY,
-        audio_receiver_size=1024,
-        rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
-        media_stream_constraints={"video": False, "audio": True},
-    )
+# webrtc_ctx = webrtc_streamer(
+#         key="speech-to-text",
+#         mode=WebRtcMode.SENDONLY,
+#         audio_receiver_size=1024,
+#         rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+#         media_stream_constraints={"video": False, "audio": True},
+#     )
 
 r = sr.Recognizer()
 r.pause_threshold = 5
@@ -68,7 +68,7 @@ st.title("Summarize the doctor's conversations")
 st.subheader('Record your voice or conversation, and we will summarize it for you')
 
 
-with sr.Microphone() as source2:
+with sr.Microphone(device_index=0) as source2:
     if st.button('Start'):
         st.subheader('Results')
         with st.spinner('Recording...'):
