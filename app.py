@@ -63,12 +63,13 @@ with st.sidebar:
     st.write(f'[{MIN_Length}, {MAX_Length}]')
 
 
+st.title(sr.Microphone.list_microphone_names())
 
 st.title("Summarize the doctor's conversations")
 st.subheader('Record your voice or conversation, and we will summarize it for you')
 
 
-with sr.Microphone(device_index=0) as source2:
+with sr.Microphone() as source2:
     if st.button('Start'):
         st.subheader('Results')
         with st.spinner('Recording...'):
