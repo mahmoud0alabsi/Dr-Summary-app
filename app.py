@@ -8,7 +8,7 @@ from streamlit_lottie import st_lottie
 import whisper
 import librosa
 
-
+st.set_page_config(page_title='Summary Doctor')
 
 # r = sr.Recognizer()
 # r.pause_threshold = 5
