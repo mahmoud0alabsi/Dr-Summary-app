@@ -7,3 +7,7 @@ jsonschema==4.18.0
 jsonschema-specifications==2023.6.1
 SpeechRecognition==3.10.0
 streamlit-webrtc==0.45.1
+librosa==0.10.0.post2
+whisper==1.1.10
+openai-whisper==20230314
+streamlit-lottie==0.0.5
