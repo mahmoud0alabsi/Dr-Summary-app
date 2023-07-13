@@ -46,7 +46,7 @@ audio = None
 with st.sidebar:
     MODEL = st.radio(
         "Choose a transcription model type:",
-        ("tiny", "base", "small", "medium"),
+        ("tiny", "base", "small"),
         index = 1
     )
 
