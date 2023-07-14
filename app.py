@@ -13,7 +13,6 @@ st.set_page_config(page_title='Summary Doctor')
 # r = sr.Recognizer()
 # r.pause_threshold = 5
 
-
 API_TOKEN = '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'
 API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
