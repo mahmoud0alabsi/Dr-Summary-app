@@ -84,8 +84,8 @@ st.subheader('Record your voice or conversation, and we will summarize it for yo
 #     else:
 #         st.write('Start Recording by click (Start) button')
 
-uploaded_file = st.file_uploader("Choose an audio file (.mp3, .wav, .m4a)", accept_multiple_files=False,
-                                type=['mp3', 'wav', 'm4a'])
+uploaded_file = st.file_uploader("Choose an audio file (.mp3, .wav)", accept_multiple_files=False,
+                                type=['mp3', 'wav'])
 
 def load_lottieurl(url: str):
     r = requests.get(url)
