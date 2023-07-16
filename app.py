@@ -96,14 +96,9 @@ if st.button("Extract & Generate") and uploaded_file is not None and API_KEY != 
 
             t1 = time.time()
             Final_Text = PROMPT + '\n' + MyText
-            print(PROMPT)
-            print('///////////')
-            print(Final_Text)
             summarize_text = call_api(Final_Text, GPT_MODEL)
             t2 = time.time()
             TIME_TO_SUMM = t2 - t1
-            print('///////////')
-            print(summarize_text)
             st.subheader('Summarized Text:')
             st.markdown(str(summarize_text))
 
