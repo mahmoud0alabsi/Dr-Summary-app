@@ -2,111 +2,78 @@ import streamlit as st
 import time
 # import speech_recognition as sr
 import pyttsx3
-import requests
-import json
-from streamlit_lottie import st_lottie
 import whisper
 import librosa
+import openai
 
 st.set_page_config(page_title='Summary Doctor')
 
-# r = sr.Recognizer()
-# r.pause_threshold = 5
-
-API_TOKEN = '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'
-API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-headers = {"Authorization": f"Bearer {API_TOKEN}"}
-
-def query(payload):
-    data = json.dumps(payload)
-    response = requests.request("POST", API_URL, headers=headers, data=data)
-    return json.loads(response.content.decode("utf-8"))
-
-
-#Function to convert text to
-# speech
-def SpeakText(command):
-     
-    # Initialize the engine
-    engine = pyttsx3.init()
-    engine.say(command)
-    engine.runAndWait()
-
 MIN_Length = 30
 MAX_Length = 200
-MODEL = "base"
+TRANSCRIPT_MODEL = "base"
+GPT_MODEL = ''
 MyText = ""
 summarize_text = ""
 TIME_TO_RECO = 0
 TIME_TO_SUMM = 0
 audio = None
+API_KEY = ''
+
+PROMPT = "write a doctor's letter with a clear action plan at the end, based on the following conversation:"
 
 # Using "with" notation
 with st.sidebar:
-    MODEL = st.radio(
+    TRANSCRIPT_MODEL = st.radio(
         "Choose a transcription model type:",
-        ("tiny", "base", "small"),
+        ("tiny", "base", "small", "medium"),
         index = 1
     )
 
     st.divider() 
 
-    st.write('How much do you want the percentage of the summary text from the original text?')
-    MIN_Length, MAX_Length = st.slider(
-    'Select a range of values',
-    0, 100, (10, 30))
-    st.write(f'[{MIN_Length}, {MAX_Length}]')
+    API_KEY = st.text_input('Enter your OpenAI api key:')
 
+    st.divider() 
+
+    GPT_MODEL = st.radio(
+        "Choose a GPT model type:",
+        ("gpt-3.5-turbo", "gpt-4"),
+        index = 0
+    )
+
+    st.divider() 
+
+    PROMPT = st.text_area('Enter your prompt (or leave it empty to use default):')
 
 
 st.title("Summarize the doctor's conversations")
 st.subheader('Record your voice or conversation, and we will summarize it for you')
 
 
-# with sr.Microphone() as source2:
-#     if st.button('Start'):
-#         st.subheader('Results')
-#         with st.spinner('Recording...'):
-#             # MyText, summarize_text, TIME_TO_RECO, TIME_TO_SUMM = run_func()
-
-#             #------------------
-#             # wait for a second to let the recognizer
-#             # adjust the energy threshold based on
-#             # the surrounding noise level
-#             r.adjust_for_ambient_noise(source2, duration=0.2)
-
-#             #listens for the user's input
-#             audio = r.listen(source2)
-#             #------------------
-#             st.success('Recording done!')
-
-#     else:
-#         st.write('Start Recording by click (Start) button')
 
 uploaded_file = st.file_uploader("Choose an audio file (.mp3, .wav)", accept_multiple_files=False,
                                 type=['mp3', 'wav'])
 
-def load_lottieurl(url: str):
-    r = requests.get(url)
-    if r.status_code!= 200:
-        return None
-    return r.json()
 
-voice_animation = load_lottieurl("https://assets4.lottiefiles.com/packages/lf20_owkzfxim.json")
+def call_api(text, model_id):
+    model_id = model_id
+    conversation = []
+    conversation.append({'role': 'user', 'content': text})
+    response = openai.ChatCompletion.create(
+        model=model_id,
+        messages=conversation
+    )
+    return response.choices[0].message.content
 
-
-
-
-if st.button("Extract & Generate") and uploaded_file is not None:
+if st.button("Extract & Generate") and uploaded_file is not None and API_KEY != '':
+    openai.api_key = API_KEY
     st.divider()
     with st.spinner('Prepare Text and summary...'):
-        st_lottie(voice_animation, height=200)
 
         audio, _ = librosa.load(uploaded_file, sr=16000)
-        model = whisper.load_model(MODEL)
+        model = whisper.load_model(TRANSCRIPT_MODEL)
 
         t1 = time.time()
-        #MyText = r.recognize_whisper(uploaded_file, model=MODEL)
         MyText = model.transcribe(audio)
         t2 = time.time()
         TIME_TO_RECO = t2 - t1 
@@ -123,26 +90,34 @@ if st.button("Extract & Generate") and uploaded_file is not None:
             st.subheader('Sorry, An error occurred when extract text from record !')
 
 
-        t1 = time.time()
-        summarize_text = query(
-            {
-                "inputs": MyText,
-                "parameters": {"min_length": int((int( (MIN_Length/100)*len(MyText.split(' ')))*1.4)) , "max_length": int((int( (MAX_Length/100)*len(MyText.split(' ')))*1.4))  },
-            }
-        )
-        t2 = time.time()
-        TIME_TO_SUMM = t2 - t1 
-
         try:
+            if PROMPT == '':
+                PROMPT = "write a doctor's letter with a clear action plan at the end, based on the following conversation:"
+
+            t1 = time.time()
+            Final_Text = PROMPT + '\n' + MyText
+            print(PROMPT)
+            print('///////////')
+            print(Final_Text)
+            summarize_text = call_api(Final_Text, GPT_MODEL)
+            t2 = time.time()
+            TIME_TO_SUMM = t2 - t1
+            print('///////////')
+            print(summarize_text)
             st.subheader('Summarized Text:')
-            st.markdown(str(summarize_text[0]['summary_text']))
+            st.markdown(str(summarize_text))
 
             st.markdown('Time to summarize = ' + str(int(TIME_TO_SUMM)) + 's')
 
             st.divider() 
+
+            st.success('All Done!!')
+
         except:
-            st.subheader('Sorry, An error occurred when summarize text !')
+            st.error('An error occurred when try make request, your api key may not be valid', icon="🚨") 
 
-
-        st.success('All Done!!')
+elif uploaded_file is None:
+    st.warning('Please upload your file', icon="⚠️")
+elif API_KEY == '':
+    st.warning('Please enter your OpenAI api key', icon="⚠️")
 
